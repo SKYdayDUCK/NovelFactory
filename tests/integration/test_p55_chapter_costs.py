@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 import sys
 from copy import deepcopy
@@ -13,6 +14,7 @@ from test_agent_gateway import setup_gateway
 from novel_factory.application.cost_reports import ChapterCostService
 from novel_factory.domain.errors import DomainError
 from novel_factory.fixtures import load_fixture
+from novel_factory.infrastructure.private_files import create_private_file
 
 pytestmark = [pytest.mark.integration, pytest.mark.postgres]
 
@@ -121,17 +123,15 @@ def test_chapter_binding_scopes_rates_cache_and_missing_evidence(kernel_env, tmp
     assert Decimal(summary["estimated_amounts"]["fixture"]["EUR"]) == Decimal("0.000042")
     assert Decimal(summary["estimated_amounts"]["fixture"]["CNY"]) == Decimal("0.000145")
     private = tmp_path / "operator.json"
-    private.write_text(
-        json.dumps(
+    with os.fdopen(create_private_file(private), "w", encoding="utf-8") as target:
+        json.dump(
             {
                 "token": world["token"],
                 "database_url": kernel_env["url"],
                 "object_root": str(kernel_env["store"].root),
                 "binding": {"work_id": work, "branch_id": branch},
-            }
+            }, target
         )
-    )
-    private.chmod(0o600)
     rate_doc = tmp_path / "rates.json"
     rate_doc.write_text(json.dumps(rates))
     cli = [

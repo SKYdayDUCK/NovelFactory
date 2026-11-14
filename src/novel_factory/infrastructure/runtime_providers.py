@@ -47,6 +47,8 @@ class RuntimeModelAdapter:
                 raise ModelCallFailure("DRY_RUN_MODE_MISMATCH")
             return response
         except ProfileError as exc:
+            if str(exc) == "MODEL_TLS_CONFIGURATION_INVALID" and self.profile.kind in {"deepseek", "openai-compatible"}:
+                raise ModelCallFailure(str(exc), sent=False) from None
             raise DomainError(str(exc), "The selected model is unavailable for this dispatch") from None
 
 

@@ -7,16 +7,16 @@ of the ObjectStore port and must be preserved by callers.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
 import hashlib
 import os
-from pathlib import Path
 import re
 import tempfile
 import time
-from typing import Callable, Iterable
+from collections.abc import Callable, Iterable
+from dataclasses import dataclass
+from pathlib import Path
 
-from .native_files import file_lock, publish_file, sync_directory
+from .native_files import durable_reader, file_lock, publish_file, sync_directory
 
 _HASH = re.compile(r"^[0-9a-f]{64}$")
 
@@ -78,7 +78,7 @@ class ObjectStore:
                 raise ObjectStoreError("OBJECT_CORRUPT", "Object path is a symlink")
             size = 0
             h = hashlib.sha256()
-            with p.open("rb+" if os.name == "nt" else "rb") as f:
+            with durable_reader(p, readonly_lock=self.temporary / ("durability-" + digest + ".lock")) as f:
                 for block in iter(lambda: f.read(1024 * 1024), b""):
                     h.update(block)
                     size += len(block)
@@ -89,6 +89,8 @@ class ObjectStore:
             self._fsync_dir(self.objects)
         except FileNotFoundError as exc:
             raise ObjectStoreError("OBJECT_MISSING", "Object is not durable") from exc
+        except ValueError as exc:
+            raise ObjectStoreError("OBJECT_CORRUPT", "Object path is a reparse point") from exc
         return ObjectRef(digest, size)
 
     def put(self, content: bytes, *, fault: Callable[[str], None] | None = None) -> ObjectRef:

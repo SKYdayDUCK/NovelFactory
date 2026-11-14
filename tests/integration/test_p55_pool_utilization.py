@@ -16,6 +16,7 @@ from novel_factory.application.supervisor import RuntimeSupervisor
 from novel_factory.fixtures import load_fixture
 from novel_factory.infrastructure.diagnostics import inspect
 from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
+from novel_factory.infrastructure.private_files import create_private_file
 
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 
@@ -25,8 +26,8 @@ def test_actual_worker_windows_are_distinct_from_scale_decisions(kernel_env, tmp
     world = load_fixture(kernel)
     wr = world["world_ref"]
     access = tmp_path / "scope.json"
-    access.write_text(json.dumps({"token": world["token"], "work_id": wr["work_id"], "branch_id": wr["branch_id"]}))
-    access.chmod(0o600)
+    with os.fdopen(create_private_file(access), "w", encoding="utf-8") as target:
+        json.dump({"token": world["token"], "work_id": wr["work_id"], "branch_id": wr["branch_id"]}, target)
     assert not inspect(kernel.db, 32, component="model")["worker_utilization_windows"]
     with backend(concurrent=True) as (_, requests, server):
         cert = _https(server, tmp_path)
@@ -101,7 +102,12 @@ def test_spawned_index_worker_records_actual_child_time(kernel_env):
     with ProcessPoolExecutor(max_workers=2, mp_context=multiprocessing.get_context("spawn"),
                              initializer=initialize_index_worker,
                              initargs=(kernel_env["url"], str(kernel.objects.root), meter)) as pool:
-        assert meter.sample()["busy_slot_seconds"] == 0
+        deadline = time.monotonic() + 1
+        initial = meter.sample()
+        while initial is None and time.monotonic() < deadline:
+            time.sleep(.005)
+            initial = meter.sample()
+        assert initial and initial["busy_slot_seconds"] == 0
         assert pool.submit(process_reserved_index, *args, lease).result(timeout=12)["status"] == "INDEXED"
         measured = meter.sample()
     assert 0 < measured["busy_slot_seconds"] <= measured["window_seconds"]

@@ -1,6 +1,7 @@
 """Fixture manuscripts and ephemeral signing keys exercise the host handoff on real PostgreSQL."""
 
 import json
+import os
 from copy import deepcopy
 from pathlib import Path
 
@@ -15,14 +16,21 @@ from novel_factory.application.production_profiles import bind_profile, resolve_
 from novel_factory.application.release import ReleaseService
 from novel_factory.domain.book_review import PROTOCOL, PROTOCOL_HASH, RUBRIC
 from novel_factory.domain.errors import DomainError
+from novel_factory.infrastructure.native_files import publish_file
+from novel_factory.infrastructure.private_files import private_temporary_file
 from scripts.p6_external_review import main
 
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 
 
 def private_json(path, payload):
-    path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
-    path.chmod(0o600)
+    fd, pending = private_temporary_file(path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+            json.dump(payload, stream, ensure_ascii=False)
+        publish_file(pending, path, replace=True)
+    finally:
+        Path(pending).unlink(missing_ok=True)
     return str(path)
 
 
@@ -262,8 +270,8 @@ def test_authenticated_blind_handoff(kernel_env, tmp_path, monkeypatch, outcome)
 
 
 def test_automatic_host_handoff_signs_each_track_and_resumes(kernel_env, tmp_path, monkeypatch):
-    import sys
     from pathlib import Path
+
     from novel_factory.domain.canonical import fingerprint
     monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[2] / "scripts"))
     import p6_gpt_handoff as host

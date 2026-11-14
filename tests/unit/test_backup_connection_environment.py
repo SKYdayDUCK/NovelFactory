@@ -109,3 +109,17 @@ def test_pg_tool_uses_exact_supported_url_without_editing_parent_environment(mon
     assert all(key not in child for key in (*ROUTING_VARIABLES, "PGOPTIONS"))
     assert {key: os.environ[key] for key in inherited} == inherited
     assert all(os.environ[key] == "" for key in ROUTING_VARIABLES)
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows PostgreSQL binaries use .exe")
+def test_windows_backup_invokes_native_client_with_explicit_target(monkeypatch, tmp_path):
+    executable = tmp_path / "pg_dump.exe"
+    executable.write_bytes(b"fixture executable")
+    run = Mock(return_value=SimpleNamespace(returncode=0, stdout="dumped", stderr=""))
+    monkeypatch.setattr(recovery.subprocess, "run", run)
+    result = BackupService(None, None, pg_bin=tmp_path)._tool("pg_dump", ["--version"], URL)
+    assert result["exit_code"] == 0
+    args, options = run.call_args
+    assert args[0] == [str(executable), "--version"]
+    assert options["env"]["PGDATABASE"] == "nf_generated"
+    assert options["env"]["PGPORT"] == "56459"

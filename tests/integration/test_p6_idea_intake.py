@@ -246,9 +246,10 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
                         assert data["adapter_id"] == data["routing_decision"]["profile_id"] == route
                         assert data["model_config_sha256"] == data["routing_decision"]["configuration_sha256"]
             assert tasks_by_route == {
-                "test": {("writer", "scene_draft"), ("volume_director", "window_plan")},
+                "test": {("writer", "scene_draft")},
                 "internal-review": {("reviewer", "epistemic"), ("reviewer", "literary"),
-                                    ("reviewer", "fact"), ("evidence_maintainer", "assertion_extract")},
+                                    ("reviewer", "fact"), ("evidence_maintainer", "assertion_extract"),
+                                    ("volume_director", "window_plan")},
             }
 
 
@@ -269,9 +270,12 @@ def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_pat
     def call(action, *args, status=0):
         monkeypatch.setattr(sys, "argv", ["p6_idea.py", action, "--private-dir", str(private), *args])
         assert cli.main() == status
-        return json.loads(capsys.readouterr().out)
+        captured = capsys.readouterr()
+        assert not captured.err, captured.err.splitlines()[-2:]
+        return json.loads(captured.out)
 
-    with backend() as (creative, creative_calls, creative_server), backend() as (review, review_calls, review_server):
+    with backend() as (creative, creative_wire, creative_server), backend() as (review, review_wire, review_server):
+        creative_calls, review_calls = [], []
         creative.model, review.model = "fixture-creative", "fixture-internal-review"
         adapters = {model_routes["creative"]: creative, model_routes["review"]: review}
         monkeypatch.setattr(cli, "load_runtime_profiles", lambda path, journal: adapters)
@@ -299,7 +303,7 @@ def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_pat
             def review_with_questions(request):
                 response = review_generate(request)
                 envelope = json.loads(response.text)
-                if len(review_calls) == 1 and envelope["payload"]["short_arc"]["decision"] == "ENDING_PLAN_REQUIRED":
+                if envelope["role_id"] == "reviewer" and len(review_calls) == 1 and envelope["payload"]["short_arc"]["decision"] == "ENDING_PLAN_REQUIRED":
                     envelope["unresolved_questions"] = ["画师最后如何处理委托？"]
                 return replace(response, text=json.dumps(envelope, ensure_ascii=False))
             review.generate = review_with_questions
@@ -328,15 +332,15 @@ def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_pat
             return result
         review_server.packet_candidate = complete_review
         if first_result in {"ending_plan", "historical_ending", "editor_fix"}:
-            original = creative.generate
+            original = review.generate
             def ending_with_question(request):
                 result = original(request)
-                if len(creative_calls) > 1:
+                if json.loads(result.text)["role_id"] == "world_designer" and len(creative_calls) > 1:
                     envelope = json.loads(result.text)
                     envelope["unresolved_questions"] = ["签字后送信人怎样行动？"]
                     return replace(result, text=json.dumps(envelope, ensure_ascii=False))
                 return result
-            creative.generate = ending_with_question
+            review.generate = ending_with_question
         def design_reply(packet):
             if len(creative_calls) == 1 and first_result in {"missing_opening", "repaired_then_question"}:
                 return {k: v for k, v in design.items() if k != "opening"}
@@ -380,6 +384,17 @@ def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_pat
                 return {"short_arc": arc(packet), "summary": "独立核查设定", "counterinterpretations": [], "evidence_refs": [],
                         "issues": [issue] if len(review_calls) == 1 or first_result == "repaired_then_question" else []}
             review_server.packet_candidate = review_reply
+        # Planning and design use the planning/review route. Partition fixture
+        # observations by task role, independently of the HTTP connection.
+        review_reply_callback = review_server.packet_candidate
+        def routed_candidate(packet):
+            if packet["context"]["role_id"] == "world_designer":
+                creative_calls.append({"model": review.model})
+                return design_reply(packet)
+            review_calls.append({"model": review.model})
+            return review_reply_callback(packet)
+        review_server.packet_candidate = routed_candidate
+        creative_server.packet_candidate = lambda _: pytest.fail("Planning reached the writing provider")
         preview = call("preflight", "--idea", str(idea_path), *flags)
         assert preview["model_routes"] == model_routes and preview["model_requests"] == 0
         review.model = creative.model
@@ -392,8 +407,8 @@ def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_pat
         assert enrolled["model_routes"] == model_routes and not creative_calls and not review_calls
         assert call("advance", "--adapter", "pro-fixture", status=2)["error"] == "IDEMPOTENCY_MISMATCH"
         if first_result in {"historical_duplicate", "historical_null_note"}:
-            from novel_factory.contracts.registry import validate_contract
             from novel_factory.application import agent_gateway
+            from novel_factory.contracts.registry import validate_contract
             # First call uses the historical strict parser to produce a real terminal REJECTED receipt.
             with monkeypatch.context() as old:
                 old.setattr(agent_gateway, "validated_payload",
@@ -402,20 +417,22 @@ def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_pat
                     call("advance")
                     if creative_calls:
                         break
+        advance_states = []
         for _ in range(22):
             if first_result == "historical_ending" and len(review_calls) == 1 and len(creative_calls) == 1:
                 # Recreate the earlier contract frozen into the exceptional real ending-plan task.
                 from novel_factory.application.runtime_tasks import RuntimeTaskService
                 prepare = RuntimeTaskService.prepare
-                def previous_contract(service, *args, **kwargs):
+                def previous_contract(service, *args, _prepare=prepare, **kwargs):
                     if kwargs["role_id"] == "world_designer":
                         service.gateway.output_contracts[("world_designer", "initial_world")] = ("EnvironmentalOpeningWorldDesign", "production_profile")
-                    return prepare(service, *args, **kwargs)
+                    return _prepare(service, *args, **kwargs)
                 with monkeypatch.context() as old:
                     old.setattr(RuntimeTaskService, "prepare", previous_contract)
                     result = call("advance")
             else:
                 result = call("advance")
+            advance_states.append({key: result[key] for key in ("status", "reason", "error", "cost_status") if key in result})
             if first_result == "editor_fix" and result.get("reason") == "ENDING_PLAN_BLOCKERS":
                 attempt = result["review_attempt"]
                 assert call("advance") == result and len(creative_calls) == len(review_calls) == 2
@@ -430,12 +447,13 @@ def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_pat
             assert result["status"] == "DESIGN_REWORK_REQUIRED" and result["reason"] == "SHORT_ENDING_REQUIRED"
             assert result == call("advance") and len(creative_calls) == len(review_calls) == 2
             return
-        assert result["status"] == "INITIAL_PLAN_MATERIALIZED", result
-        assert result["model"] == creative.model and result["design_review"]["model"] == review.model
+        assert result["status"] == "INITIAL_PLAN_MATERIALIZED", json.dumps(advance_states[:3])
+        assert result["model"] == review.model and result["design_review"]["model"] == review.model
         assert result["model_routes"] == model_routes
         assert call("advance") == result
         creative_count = {"approved": 1, "historical_duplicate": 1, "historical_null_note": 1, "repaired_then_question": 3, "quality_revision_schema": 3, "editor_fix": 3}.get(first_result, 2)
-        assert [r["model"] for r in creative_calls] == [creative.model] * creative_count
+        assert not creative_wire and len(review_wire) == len(creative_calls) + len(review_calls)
+        assert [r["model"] for r in creative_calls] == [review.model] * creative_count
         assert [r["model"] for r in review_calls] == [review.model] * (3 if first_result == "editor_fix" else 2 if first_result in {"review_rejected", "repaired_then_question", "quality_revision_schema", "ending_plan", "historical_ending"} else 1)
         if creative_count > 1:
             assert result["original_input_ref"] == enrolled["input_ref"] != result["source_input_ref"]

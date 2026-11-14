@@ -534,6 +534,11 @@ class AgentGateway:
         return f"{request['task_id']}:{request['generation']}:{request['call_key']}"
 
     def _finish(self, principal, request, binding, audit_ref, audit):
+        if audit["usage"]["cost_status"] == "NOT_SENT":
+            from novel_factory.orchestration.runtime_admission import refund_definite_unsent
+            retry = refund_definite_unsent(self.kernel, binding, audit_ref)
+            return {"status": "BLOCKED", "reason": audit["reason"], "attempt_id": audit["attempt_id"],
+                    "evidence_ref": audit_ref, "cost_status": "NOT_SENT", "retry": retry}
         if audit["outcome"] == "UNKNOWN":
             return {"status": "BLOCKED", "reason": audit["reason"], "attempt_id": audit["attempt_id"],
                     "evidence_ref": audit_ref, "cost_status": audit["usage"]["cost_status"]}
@@ -669,12 +674,12 @@ class AgentGateway:
                 # terminal billing receipt does not prove task delivery.
                 other = [c for c in pending if (c["generation"], c["call_key"]) !=
                          (request["generation"], request["call_key"])]
-                if other and ("routing_decision" in binding["input"] or
-                              getattr(self.adapters[binding["input"]["adapter_id"]], "provider_key", None)):
+                if other:
                     from sqlalchemy import text
                     released = set(repo.conn.scalars(text("""
                         SELECT u.attempt_id::text FROM nf_runtime_unsent u JOIN nf_call_attempts c USING(attempt_id)
-                        WHERE c.task_id=:task AND c.state='FAILED' AND c.actual_amount=0
+                        WHERE c.task_id=:task AND c.state='FAILED' AND c.actual_amount=0 AND c.actual_tokens=0
+                          AND u.generation=c.generation
                     """), {"task": request["task_id"]}))
                     other = [c for c in other if str(c["attempt_id"]) not in released]
                 require(not other or (lookup and len(other) == 1 and str(other[0]["attempt_id"]) == lookup.attempt_id
@@ -697,6 +702,7 @@ class AgentGateway:
         usage = {"input_tokens": None, "output_tokens": None, "cached_input_tokens": None,
                  "actual_amount": None, "currency": None, "cost_status": "UNKNOWN_COST"}
         outcome, result_status, reason, provider_receipt = "UNKNOWN", "FAILED", None, None
+        definite_unsent = False
         try:
             protocol_failure = None
             try:
@@ -750,6 +756,13 @@ class AgentGateway:
             outcome, result_status = "VALIDATED_CANDIDATE", envelope["status"]
         except ModelCallFailure as exc:
             reason = exc.code
+            from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
+            from novel_factory.infrastructure.runtime_providers import RuntimeModelAdapter
+            trusted_http = (type(adapter) is OpenAICompatibleAdapter or
+                type(adapter) is RuntimeModelAdapter and adapter.profile.kind in {"deepseek", "openai-compatible"})
+            definite_unsent = (trusted_http and exc.code == "MODEL_TLS_CONFIGURATION_INVALID"
+                and exc.sent is False and exc.received is None and response_ref is None and output_ref is None
+                and provider_receipt is None)
         except DomainError as exc:
             reason = exc.code
         except Exception:  # noqa: BLE001 -- retain UNKNOWN without leaking provider headers or credentials.
@@ -764,11 +777,16 @@ class AgentGateway:
         if lookup:
             known = known and bool(provider_receipt) and Decimal(usage["actual_amount"]) == Decimal(usage["actual_amount"]).quantize(Decimal("0.000001"))
         accounting_state = "SUCCEEDED" if known and outcome == "VALIDATED_CANDIDATE" else "FAILED" if known else "UNKNOWN"
+        if definite_unsent:
+            usage = {"input_tokens": 0, "output_tokens": 0, "cached_input_tokens": 0,
+                     "actual_amount": "0", "currency": binding["spec"]["budget"]["currency"], "cost_status": "NOT_SENT"}
+            outcome, accounting_state = "REJECTED", "FAILED"
         if lookup and accounting_state == "UNKNOWN":
             outcome, result_status, reason = "UNKNOWN", "FAILED", "CALL_RECONCILIATION_REQUIRED"
-        self.kernel.tasks.settle_call(attempt, state=accounting_state,
-            actual_amount=usage["actual_amount"] if known else None,
-            actual_tokens=actual_tokens if known else 0, provider_receipt=provider_receipt)
+        if not definite_unsent:
+            self.kernel.tasks.settle_call(attempt, state=accounting_state,
+                actual_amount=usage["actual_amount"] if known else None,
+                actual_tokens=actual_tokens if known else 0, provider_receipt=provider_receipt)
         audit = {"schema_version": "2.1", "attempt_id": attempt, "task_id": request["task_id"],
                  "generation": request["generation"], "context_bundle_id": binding["task"]["context_bundle_id"],
                  "world_ref": binding["spec"]["world_ref"], "role_id": binding["spec"]["role_id"],
@@ -785,6 +803,19 @@ class AgentGateway:
         for key in ("dynamic_assignment_ref", "adaptive_instruction_ref"):
             if key in binding:
                 audit[key] = binding[key]
+        if definite_unsent:
+            # The immutable NOT_SENT audit, refund, marker and generation move
+            # share one commit. A concurrent UNKNOWN is never reclassified.
+            with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
+                repo.one("tasks", {"task_id": binding["task"]["task_id"]}, lock="update")
+                current = repo.one("call_attempts", {"attempt_id": attempt})
+                if current["state"] == "SENT":
+                    bound = self.with_kernel(self.kernel.in_transaction(repo))
+                    audit_ref = bound._audit_artifact(binding, attempt, "audit", audit, "AGENT_CALL_EVIDENCE")
+                    return bound._finish(principal, request, binding, audit_ref, audit)
+                audit.update(outcome="UNKNOWN", reason="CALL_RECONCILIATION_REQUIRED", accounting_state=current["state"],
+                             usage={"input_tokens": None, "output_tokens": None, "cached_input_tokens": None,
+                                    "actual_amount": None, "currency": None, "cost_status": "UNKNOWN_COST"})
         audit_ref = self._audit_artifact(binding, attempt, "audit", audit, "AGENT_CALL_EVIDENCE")
         # A grant can be revoked, or the task cancelled, during network IO.
         # Evidence is retained above; this new live check prevents delivery.

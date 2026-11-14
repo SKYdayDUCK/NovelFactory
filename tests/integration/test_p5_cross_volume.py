@@ -8,6 +8,9 @@ from pathlib import Path
 from uuid import uuid4
 
 import pytest
+from test_continuity import entry, qualify, request, reviewer, volume
+from test_p5_process_resume import _https
+from test_p5_supervisor import backend
 
 from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.continuity import ContinuityService
@@ -18,9 +21,7 @@ from novel_factory.domain.canonical import fingerprint
 from novel_factory.domain.errors import DomainError
 from novel_factory.fixtures import point
 from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
-from test_continuity import entry, qualify, request, reviewer, volume
-from test_p5_process_resume import _https
-from test_p5_supervisor import backend
+from novel_factory.infrastructure.private_files import create_private_file
 
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 ROOT = Path(__file__).resolve().parents[2]
@@ -50,7 +51,7 @@ def test_published_volume_to_recovered_planner(kernel_env, tmp_path):
                          dependency_fingerprint=fingerprint(snapshot))
     contract_ref = plans.save_volume_contract(controller, next_contract, "volume-two-contract")
     access = tmp_path / "supervisor.json"
-    with os.fdopen(os.open(access, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600), "w") as out:
+    with os.fdopen(create_private_file(access), "w", encoding="utf-8") as out:
         json.dump({"token": f["token"], "work_id": wid, "branch_id": branch}, out)
 
     with backend() as (_, calls, http):
@@ -61,8 +62,8 @@ def test_published_volume_to_recovered_planner(kernel_env, tmp_path):
         gateway = AgentGateway(kernel, {"external": route})
         supervisor = RuntimeSupervisor(kernel, gateway)
         runtime = RuntimeTaskService(kernel, gateway)
-        shared = dict(story_time=point(12), subject_ids=[f["ids"]["sword"]], predicates=["owner"],
-                      adapter_id="external")
+        shared = {"story_time": point(12), "subject_ids": [f["ids"]["sword"]], "predicates": ["owner"],
+                  "adapter_id": "external"}
         # Even a deliberately assigned snapshot cannot grant editorial memory to a character.
         actor = runtime.prepare(controller, wr, role_id="character_actor", task_kind="character_action",
             actor_id=f["ids"]["protagonist"], assignment="当时知道什么？", material_refs=[snapshot], **shared)
@@ -96,7 +97,7 @@ def test_published_volume_to_recovered_planner(kernel_env, tmp_path):
                "NO_PROXY": "127.0.0.1", "SSL_CERT_FILE": str(cert)}
         def fresh_worker():
             run = subprocess.run([sys.executable, "scripts/run_supervisor.py", "--access-file", str(access),
-                                  "--once"], cwd=ROOT, env=env, capture_output=True, text=True, timeout=40)
+                                  "--once"], cwd=ROOT, env=env, capture_output=True, text=True, timeout=40, check=False)
             assert run.returncode == 0, run.stderr
             return json.loads(run.stdout)
 

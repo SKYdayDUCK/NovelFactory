@@ -1,14 +1,14 @@
 """Check shared Token reservations using actual concurrent PostgreSQL transactions."""
 
-from concurrent.futures import ThreadPoolExecutor
-from threading import Barrier
-from pathlib import Path
-from uuid import uuid4
 import json
 import os
 import subprocess
-import time
 import sys
+import time
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+from threading import Barrier
+from uuid import uuid4
 
 import pytest
 from sqlalchemy import text
@@ -16,6 +16,7 @@ from sqlalchemy import text
 from novel_factory.application.budget_limits import SharedBudgetService
 from novel_factory.domain.errors import DomainError
 from novel_factory.fixtures import create_bound_task, load_fixture, point
+from novel_factory.infrastructure.private_files import create_private_file
 from novel_factory.infrastructure.recovery import fence_recovered_tasks
 
 pytestmark = [pytest.mark.integration, pytest.mark.postgres]
@@ -110,14 +111,14 @@ def test_cross_task_reservation_unknown_idempotency_and_recovery(kernel_env, tmp
         service.status(restricted, work, branch, budget)
     assert denied.value.code == "VIEW_DENIED"
     binding = tmp_path / "project.json"
-    with os.fdopen(os.open(binding, os.O_EXCL | os.O_WRONLY | os.O_CREAT, 0o600), "w") as f:
+    with os.fdopen(create_private_file(binding), "w") as f:
         json.dump(
-            dict(
-                token=w["token"],
-                database_url=kernel_env["url"],
-                object_root=str(kernel.objects.root),
-                binding=dict(work_id=work, branch_id=branch),
-            ),
+            {
+                "token": w["token"],
+                "database_url": kernel_env["url"],
+                "object_root": str(kernel.objects.root),
+                "binding": {"work_id": work, "branch_id": branch},
+            },
             f,
         )
     proc = subprocess.run(
@@ -132,6 +133,7 @@ def test_cross_task_reservation_unknown_idempotency_and_recovery(kernel_env, tmp
         ],
         capture_output=True,
         text=True,
+        check=False,
     )
     assert proc.returncode == 0, proc.stderr
     assert json.loads(proc.stdout) == service.status(*scope)

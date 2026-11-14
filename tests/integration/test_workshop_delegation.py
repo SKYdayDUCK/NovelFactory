@@ -5,9 +5,9 @@ import json
 import os
 import sys
 import time
-from threading import Event, current_thread, main_thread
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
+from threading import Event, current_thread, main_thread
 from uuid import uuid4
 
 import pytest
@@ -44,7 +44,8 @@ def site(kernel_env, tmp_path):
     inst_id = ticket["installation_id"]
     runtime = Delegations(kernel, inst_id, ticket["token"])
     config = tmp_path / "binding.json"
-    with os.fdopen(os.open(config, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600), "w") as stream:
+    from novel_factory.infrastructure.private_files import create_private_file
+    with os.fdopen(create_private_file(config), "w") as stream:
         json.dump(
             {
                 "installation_id": inst_id,
@@ -460,10 +461,10 @@ def test_installation_revoke_racing_model_spend_has_one_lock_order(site, monkeyp
 
     def before_sql(conn, cursor, statement, parameters, context, many):
         nonlocal spender_pid
-        if installation_locked.is_set() and current_thread() is main_thread():
-            if "FOR SHARE OF i" in statement:
-                spender_pid = conn.connection.driver_connection.info.backend_pid
-                spending_at_installation.set()
+        if (installation_locked.is_set() and current_thread() is main_thread()
+                and "FOR SHARE OF i" in statement):
+            spender_pid = conn.connection.driver_connection.info.backend_pid
+            spending_at_installation.set()
 
     def contend(*args, **kwargs):
         with ThreadPoolExecutor(1) as worker:

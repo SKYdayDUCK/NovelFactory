@@ -35,6 +35,10 @@ uv run --no-sync python scripts/nf.py supervisor --access-file "$private/supervi
 
 The operator can restore eligible work through the branch binding using `'{}' | uv run --no-sync python scripts/nf.py call --binding "$private/resume.json" nf_resume_project`. Linux runs the same Python commands after setting the environment below. The original two-service bootstrap scripts and the Bubblewrap role-tool sandbox require Linux. The Windows job covers native bootstrap, real MCP stdio, simulated providers, object publication, lease recovery, cancellation and idle session retirement on real PostgreSQL 17. The Windows provider test runs the pinned native `codex.exe` app-server against a synthetic upstream. The job result identifies the exact tested commit.
 
+On Windows, set `PG_BIN` to native PostgreSQL 17 clients containing `pg_dump.exe` and `pg_restore.exe`. WSL clients alone do not provide executables for a Windows backup process. The private `scripts/local_runtime.py` launcher injects credentials and environment settings; its test Redis URL uses database 15, separate from production database 0. HTTPS adapters honor `SSL_CERT_FILE` and `SSL_CERT_DIR`, reject invalid trust configuration before sending, and retain certificate and hostname verification.
+
+Historical releases use POSIX locks. For historical migration tests on Windows, configure `NF_TEST_HISTORICAL_WSL_DISTRIBUTION` and `NF_TEST_HISTORICAL_PYTHON` to run old seed and migration processes in a provisioned WSL Python environment. Current release verification still runs on Windows. Historical archives retain LF bytes, and database credentials travel through the environment rather than command arguments.
+
 ## Provision the two-service installation on Linux
 
 Start in the repository root on Linux or WSL2 with uv, Python 3.12, a running Docker Engine and Compose v2. Install each project's locked dependencies. Workshop's `streams` extra provides the Redis client for notifications.

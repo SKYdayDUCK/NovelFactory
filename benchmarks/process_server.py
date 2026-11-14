@@ -27,10 +27,32 @@ from novel_factory.interfaces.admission import ConnectionBudget
 from novel_factory.interfaces.http import HttpSettings, create_app
 
 
-def _worker(channel, listener, url, objects, processes, pool_size):
-    """Spawn target: inherited engines/connections are deliberately impossible."""
+def _resource_usage():
+    """Process lifetime CPU seconds and peak resident memory in KiB.
+
+    Windows FILETIMEs count 100 ns ticks and PeakWorkingSetSize counts bytes.
+    Linux getrusage already reports seconds and ru_maxrss in KiB. Neither path
+    substitutes current RSS for the lifetime peak; callers difference CPU only.
+    """
+    if os.name == 'nt':
+        import win32api
+        import win32process
+
+        process = win32api.GetCurrentProcess()
+        times = win32process.GetProcessTimes(process)
+        memory = win32process.GetProcessMemoryInfo(process)
+        return {'user_cpu_seconds': times['UserTime'] / 10_000_000,
+                'system_cpu_seconds': times['KernelTime'] / 10_000_000,
+                'peak_rss_kib': memory['PeakWorkingSetSize'] // 1024}
     import resource
 
+    current = resource.getrusage(resource.RUSAGE_SELF)
+    return {'user_cpu_seconds': current.ru_utime, 'system_cpu_seconds': current.ru_stime,
+            'peak_rss_kib': current.ru_maxrss}
+
+
+def _worker(channel, listener, url, objects, processes, pool_size):
+    """Spawn target: inherited engines/connections are deliberately impossible."""
     db = Database(url, pool_size=pool_size, max_overflow=0)
     kernel = Kernel(db, ObjectStore(objects))
     service = WorldQueryService(kernel)
@@ -44,7 +66,7 @@ def _worker(channel, listener, url, objects, processes, pool_size):
     if os.environ.get('NF_BENCH_DIAGNOSTICS') == '1':
         from benchmarks.service_diagnostics import ServiceDiagnostics
         diagnostics = ServiceDiagnostics().install(db, kernel, service, app)
-    before = resource.getrusage(resource.RUSAGE_SELF)
+    before = _resource_usage()
     started = time.monotonic()
     try:
         with SqlMeasurements(db.engine) as meter:
@@ -62,15 +84,16 @@ def _worker(channel, listener, url, objects, processes, pool_size):
                     break
                 if command != 'snapshot':
                     raise ValueError('unknown measurement control')
-                current = resource.getrusage(resource.RUSAGE_SELF)
+                current = _resource_usage()
                 channel.send({'database': meter.result(time.monotonic() - started),
                     'cache_hits': service.cache_hits, 'cache_misses': service.cache_misses,
                     'admission': app.state.admission.snapshot(),
                     'authentication_admission': app.state.authentication_admission.snapshot(),
                     'ingress': app.state.ingress.snapshot(),
-                    'resources': {'user_cpu_seconds': current.ru_utime - before.ru_utime,
-                        'system_cpu_seconds': current.ru_stime - before.ru_stime,
-                        'peak_rss_kib': current.ru_maxrss},
+                    'resources': {
+                        'user_cpu_seconds': current['user_cpu_seconds'] - before['user_cpu_seconds'],
+                        'system_cpu_seconds': current['system_cpu_seconds'] - before['system_cpu_seconds'],
+                        'peak_rss_kib': current['peak_rss_kib']},
                     'diagnostics': diagnostics.snapshot() if diagnostics else None})
     except (EOFError, BrokenPipeError):
         pass
@@ -116,6 +139,7 @@ def aggregate(snapshots, duration):
         'service_user_cpu_seconds': sum(row['resources']['user_cpu_seconds'] for row in snapshots),
         'service_system_cpu_seconds': sum(row['resources']['system_cpu_seconds'] for row in snapshots),
         'service_sum_peak_rss_kib': sum(row['resources']['peak_rss_kib'] for row in snapshots),
+        'peak_rss_note': 'Sum of lifetime process peaks in KiB; not simultaneous RSS',
     }
     return result
 

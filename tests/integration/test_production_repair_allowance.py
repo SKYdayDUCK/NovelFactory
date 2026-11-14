@@ -122,7 +122,8 @@ def test_preview_apply_preserves_every_old_attempt_budget_task_and_board(kernel_
 
 
 @pytest.mark.parametrize("field,value", [("expected_board_sha256", "f" * 64),
-    ("expected_task_id", str(uuid4())), ("expected_generation", 900), ("expected_revision", 74)])
+    pytest.param("expected_task_id", str(uuid4()), id="stale-task"),
+    ("expected_generation", 900), ("expected_revision", 74)])
 def test_stale_binding_cannot_migrate(kernel_env, field, value):
     kernel = kernel_env["kernel"]
     owner, _, _, request = legacy(kernel)

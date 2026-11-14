@@ -5,12 +5,14 @@ import base64
 import hashlib
 import json
 import os
+import ssl
 import sys
 import tempfile
-from pathlib import Path
 from datetime import UTC, datetime
+from pathlib import Path
 from urllib.error import HTTPError
-from urllib.request import HTTPRedirectHandler, Request, build_opener
+from urllib.parse import urlsplit
+from urllib.request import HTTPRedirectHandler, HTTPSHandler, Request, build_opener
 
 
 class _NoRedirect(HTTPRedirectHandler):
@@ -56,7 +58,17 @@ def main():
         request = Request(options["url"], data=body, method="POST", headers={
             "Authorization": "Bearer " + options["credential"], "Content-Type": "application/json",
             "X-Client-Request-Id": options["request_hash"], **(options.get("headers") or {})})
-        transport = build_opener(_NoRedirect)
+        context = None
+        if urlsplit(options["url"]).scheme == "https":
+            try:
+                capath = os.environ.get("SSL_CERT_DIR")
+                if capath and not Path(capath).is_dir():
+                    raise ValueError("Invalid TLS trust directory")
+                context = ssl.create_default_context(cafile=os.environ.get("SSL_CERT_FILE"), capath=capath)
+            except (OSError, ValueError):
+                json.dump({"failure": "MODEL_TLS_CONFIGURATION_INVALID", "sent": False}, sys.stdout)
+                return
+        transport = build_opener(_NoRedirect, HTTPSHandler(context=context))
         started_at = datetime.now(UTC).isoformat()
         try:
             reply = transport.open(request, timeout=options["timeout"])

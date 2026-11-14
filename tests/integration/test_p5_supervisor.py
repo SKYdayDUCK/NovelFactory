@@ -1,12 +1,12 @@
 """PostgreSQL restart/wake gate; the HTTP provider is an explicitly synthetic fixture."""
-from contextlib import contextmanager
-from http.server import BaseHTTPRequestHandler, HTTPServer, ThreadingHTTPServer
 import json
 import os
-from pathlib import Path
 import shutil
 import subprocess
 import time
+from contextlib import contextmanager
+from http.server import BaseHTTPRequestHandler, HTTPServer, ThreadingHTTPServer
+from pathlib import Path
 from threading import Thread
 
 import pytest
@@ -93,9 +93,9 @@ def _job(kernel, gateway, supervisor, world, budget, state, *, accept=False, ada
     job = RuntimeTaskService(kernel, gateway).prepare(world["principal"], wr, role_id="evidence_maintainer",
         task_kind="summary", story_time=point(1), subject_ids=[world["ids"]["sword"]], predicates=["owner"],
         assignment="Summarize visible information only", adapter_id=adapter_id, queue_state=state)
-    args = dict(manifest_ref=job.manifest_ref, knowledge_cut={"plane": "WORLD"}, context_tokens=20000,
-                input_ref=job.agent_input["input_ref"], budget_id=budget, reserve_amount="0.10",
-                token_reservation=100000, accept_summary=accept)
+    args = {"manifest_ref": job.manifest_ref, "knowledge_cut": {"plane": "WORLD"}, "context_tokens": 20000,
+                "input_ref": job.agent_input["input_ref"], "budget_id": budget, "reserve_amount": "0.10",
+                "token_reservation": 100000, "accept_summary": accept}
     supervisor.enroll(world["principal"], job.task["task_id"], **args)
     assert supervisor.enroll(world["principal"], job.task["task_id"], **args)["enrolled"]
     with pytest.raises(DomainError, match="dispatch allowance"):
@@ -144,7 +144,11 @@ def test_registered_wait_wakes_after_restart_without_model_polling(kernel_env, h
         assert len(requests) == 2
         for request in requests:
             assert set(request) == {"model", "messages", "max_completion_tokens", "stream", "response_format"}
-            assert len(request["messages"]) == 2
+            assert [m["role"] for m in request["messages"]] == ["system", "user", "system"]
+            packet = json.loads(request["messages"][1]["content"])
+            identity = json.loads(request["messages"][2]["content"].split("\nIdentity: ", 1)[1].splitlines()[0])
+            assert identity["task_id"] == packet["context"]["task_id"]
+            assert identity["world_ref"] == packet["context"]["world_ref"]
             assert not any("Process authorized NovelFactory request" in m["content"] for m in request["messages"])
         with kernel.db.uow(write=False) as repo:
             assert kernel.head(repo, work, branch) == world["world_ref"]
@@ -212,7 +216,7 @@ def test_process_death_after_provider_received_request(kernel_env):
     from datetime import timedelta
     kernel = kernel_env["kernel"]
     world = load_fixture(kernel)
-    work, branch = (world["world_ref"][k] for k in ("work_id", "branch_id"))
+    work, _branch = (world["world_ref"][k] for k in ("work_id", "branch_id"))
     with backend() as (http, requests, server):
         server.started, server.release = threading.Event(), threading.Event()
         gateway = AgentGateway(kernel, {"test": http})
@@ -244,7 +248,7 @@ def test_settled_call_without_delivered_result_is_never_reissued(kernel_env, mon
     kernel = kernel_env["kernel"]
     world = load_fixture(kernel)
     work, branch = (world["world_ref"][k] for k in ("work_id", "branch_id"))
-    with backend() as (http, requests, server):
+    with backend() as (http, requests, _server):
         gateway = AgentGateway(kernel, {"test": http})
         supervisor = RuntimeSupervisor(kernel, gateway)
         job = _job(kernel, gateway, supervisor, world, kernel.tasks.create_budget(work, "2"), "READY")
@@ -268,6 +272,7 @@ if __name__ == "__main__":
     # Separate test worker process with its own DB pool and no inherited connections.
     import os
     import sys
+
     from novel_factory.application.kernel import Kernel
     from novel_factory.infrastructure.database import Database
     from novel_factory.infrastructure.objects import ObjectStore

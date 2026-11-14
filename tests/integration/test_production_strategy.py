@@ -290,8 +290,8 @@ def test_long_legacy_history_resumes_one_unsent_diagnosis_and_delivers_complete_
     assert len(packet["assignment"]) <= 32000
     compact = json.loads(packet["assignment"].rsplit("\n", 1)[1])
     assert "findings" not in compact and compact["findings_sha256"] == fingerprint(findings)
-    material = next(item["value"] for item in packet["structured_evidence"]
-                    if item["ref"] == frozen["report_ref"])
+    material = json.loads(next(item["content"] for item in packet["authorized_materials"]
+                              if item["artifact_ref"] == frozen["report_ref"]))
     assert material["findings"] == findings and material["prior_methods"] == frozen["prior_methods"]
     assert material["history_fingerprint"] == frozen["history_fingerprint"]
     with kernel.db.uow(write=False) as repo:
@@ -300,5 +300,6 @@ def test_long_legacy_history_resumes_one_unsent_diagnosis_and_delivers_complete_
         snapshots = repo.many("artifacts", {"work_id": wr["work_id"], "kind": "CREATIVE_CONTEXT_SNAPSHOT"})
         model_input = next(row["payload"]["model_input"] for row in snapshots
                            if row["payload"]["packet"]["scope"]["task_id"] == tasks[0]["task_id"])
-        deferred = next(item["value"] for item in model_input["structured_evidence"] if item["ref"] == frozen["report_ref"])
+        deferred = json.loads(next(item["content"] for item in model_input["authorized_materials"]
+                                   if item["artifact_ref"] == frozen["report_ref"]))
         assert deferred["delivery"] == "MCP_REQUIRED" and "findings" not in deferred

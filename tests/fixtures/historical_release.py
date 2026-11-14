@@ -32,7 +32,9 @@ def release_database(kernel_env):
 
 def run_release(repo, directory, revision, program, env, *, fixture_files=()):
     archive = directory / (revision + ".tar")
-    subprocess.run(["git", "archive", "--format=tar", "--output", archive, revision,
+    # Archive must preserve the pinned release's frozen bytes even when the
+    # operator's Windows checkout has core.autocrlf=true.
+    subprocess.run(["git", "-c", "core.autocrlf=false", "-c", "core.eol=lf", "archive", "--format=tar", "--output", archive, revision,
                     "src", "runtime", "contracts", "migrations", "alembic.ini", *fixture_files], cwd=repo, check=True)
     source = directory / revision
     with tarfile.open(archive) as files:
@@ -43,9 +45,24 @@ from novel_factory.application.kernel import Kernel
 assert Path(Kernel.__init__.__code__.co_filename).resolve().is_relative_to(Path.cwd() / "src")
 """
     archived_env = {**env, "PYTHONPATH": str(source / "src"), "NF_OBJECT_ROOT": str(directory / "objects")}
-    subprocess.run([sys.executable, "-m", "alembic", "upgrade", "head"], cwd=source, env=archived_env,
+    python = [sys.executable]
+    if os.name == "nt":
+        # These genuine releases predate the Windows filesystem port. Execute
+        # their unchanged POSIX code rather than replacing locks/durability.
+        distro = env.get("NF_TEST_HISTORICAL_WSL_DISTRIBUTION")
+        executable = env.get("NF_TEST_HISTORICAL_PYTHON")
+        if not distro or not executable:
+            pytest.fail("Pinned POSIX releases on Windows require NF_TEST_HISTORICAL_WSL_DISTRIBUTION and NF_TEST_HISTORICAL_PYTHON")
+        posix_source = subprocess.check_output(["wsl", "-d", distro, "--exec", "wslpath", "-a", "-u", source.as_posix()],
+                                               text=True, encoding="utf-8").strip()
+        forwarded = ("NF_DATABASE_URL", "NF_OBJECT_ROOT", "PYTHONPATH")
+        archived_env["WSLENV"] = ":".join([
+            *[entry for entry in env.get("WSLENV", "").split(":") if entry and entry.split("/")[0] not in forwarded],
+            "NF_DATABASE_URL", "NF_OBJECT_ROOT/p", "PYTHONPATH/p"])
+        python = ["wsl", "-d", distro, "--cd", posix_source, "--exec", executable]
+    subprocess.run([*python, "-m", "alembic", "upgrade", "head"], cwd=source, env=archived_env,
                    check=True, capture_output=True)
     return json.loads(subprocess.check_output(
-        [sys.executable, "-c", bootstrap + program], cwd=source, text=True,
+        [*python, "-c", bootstrap + program], cwd=source, text=True, encoding="utf-8",
         env=archived_env,
     ))

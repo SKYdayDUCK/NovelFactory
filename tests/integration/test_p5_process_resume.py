@@ -1,20 +1,22 @@
 """MCP stdio → PostgreSQL barrier → independently restarted production Supervisor."""
 import asyncio
-from datetime import UTC, datetime, timedelta
 import json
 import os
-from pathlib import Path
 import shutil
 import signal
 import ssl
 import subprocess
 import sys
-from threading import Event
 import time
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
+from threading import Event
 
 import pytest
 from mcp import ClientSession
 from mcp.client.stdio import stdio_client
+from test_p5_mcp import config
+from test_p5_supervisor import backend
 
 from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.runtime_tasks import RuntimeTaskService
@@ -24,8 +26,6 @@ from novel_factory.infrastructure.codex_host import CodexAppServerAdapter
 from novel_factory.infrastructure.database import tables
 from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
 from novel_factory.infrastructure.repository import KernelRepository
-from test_p5_mcp import config
-from test_p5_supervisor import backend
 
 pytestmark = [pytest.mark.integration, pytest.mark.postgres]
 ROOT = Path(__file__).resolve().parents[2]
@@ -35,7 +35,14 @@ def _https(server, directory):
     """Use the production HTTPS-only configuration with a disposable loopback CA."""
     cert = directory / "loopback.pem"
     key = directory / "loopback-key.pem"
+    request_config = directory / "loopback-openssl.cnf"
+    request_config.write_text(
+        "[req]\ndistinguished_name=dn\nx509_extensions=loopback_ca\n[dn]\n"
+        "[loopback_ca]\nbasicConstraints=critical,CA:TRUE\n"
+        "keyUsage=critical,digitalSignature,keyEncipherment,keyCertSign\n"
+        "subjectKeyIdentifier=hash\nauthorityKeyIdentifier=keyid:always\n", encoding="ascii")
     subprocess.run(["openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "1",
+                    "-config", str(request_config),
                     "-keyout", str(key), "-out", str(cert), "-subj", "/CN=localhost",
                     "-addext", "subjectAltName=IP:127.0.0.1"], capture_output=True, check=True)
     tls = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
@@ -131,13 +138,13 @@ def test_one_resume_drives_real_process_restart(kernel_env, tmp_path):
 
                 async def snapshot(label):
                     state = (await call("nf_project_status"))["counts"]
-                    observations.append(dict(label=label, elapsed_s=round(time.monotonic()-started, 4),
-                                             counts=state, provider_requests=len(requests)))
+                    observations.append({"label": label, "elapsed_s": round(time.monotonic()-started, 4),
+                                         "counts": state, "provider_requests": len(requests)})
                     return state
 
                 async def cycle(expected_task=None):
                     server.started, server.release = Event(), Event()
-                    process = subprocess.Popen([sys.executable, "scripts/run_supervisor.py",
+                    process = await asyncio.to_thread(subprocess.Popen, [sys.executable, "scripts/run_supervisor.py",
                         "--access-file", str(operator), "--once"], cwd=ROOT, env=proc_env,
                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True)
                     supervisors.append(process.pid)

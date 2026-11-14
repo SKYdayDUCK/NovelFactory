@@ -2,14 +2,18 @@
 import argparse
 import asyncio
 import json
-import os
-import shutil
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
-from novel_factory.infrastructure.host_process import ISOLATED_PLUGIN_OPTIONS, start_host, stop_host
+from novel_factory.infrastructure.host_process import (
+    ISOLATED_PLUGIN_OPTIONS,
+    isolated_host_environment,
+    resolve_host_binary,
+    start_host,
+    stop_host,
+)
 
 
 async def probe(codex, binding, *, status_only=False):
@@ -22,7 +26,7 @@ async def probe(codex, binding, *, status_only=False):
 
 async def probe_bound_tool(codex, binding, expected_tools, tool, arguments):
     """Trusted Host conformance probe; the server still authorizes each request."""
-    binary = shutil.which(codex)
+    binary = resolve_host_binary(codex)
     if not binary:
         raise RuntimeError("Codex CLI executable unavailable")
     with tempfile.TemporaryDirectory(prefix="nf-host-probe-") as temp:
@@ -33,7 +37,7 @@ async def probe_bound_tool(codex, binding, expected_tools, tool, arguments):
         for key, value in server.items():
             options.extend(["-c", "mcp_servers.novelfactory." + key + "=" + json.dumps(value)])
         proc = await start_host(binary, "app-server", "--listen", "stdio://", *options,
-            cwd=temp, env={"PATH": os.defpath, "CODEX_HOME": str(home), "HOME": temp,
+            cwd=temp, env={**isolated_host_environment(temp), "CODEX_HOME": str(home),
                            "GIT_ALLOW_PROTOCOL": "file", "GIT_TERMINAL_PROMPT": "0"},
             stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.DEVNULL,
             limit=4_000_000)

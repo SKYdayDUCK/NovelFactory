@@ -168,6 +168,8 @@ class BackupService:
 
     def _tool(self, name, args, url):
         executable = self.pg_bin / name
+        if os.name == "nt" and not executable.is_file():
+            executable = executable.with_suffix(".exe")
         if not executable.is_file():
             raise DomainError("BACKUP_TOOL_UNAVAILABLE", f"Required PostgreSQL tool {name} is unavailable")
         completed = subprocess.run([str(executable), *args], env=self._pg_env(url), capture_output=True, text=True, timeout=180, check=False)
@@ -221,7 +223,7 @@ class BackupService:
                 object_rows = conn.execute(text("SELECT hash, size FROM nf_objects ORDER BY hash")).mappings().all()
                 conn.commit()
                 result = self._tool("pg_dump", ["--format=custom", "--no-owner", "--no-acl", "--file", str(dest / "database.dump")], self.engine.url)
-                with (dest / "database.dump").open("rb") as stream:
+                with (dest / "database.dump").open("r+b") as stream:
                     os.fsync(stream.fileno())
                 backup_objects = ObjectStore(dest / "objects")
                 hashes = {}
@@ -236,7 +238,7 @@ class BackupService:
                     target = dest / "interpretation" / relative
                     target.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copyfile(source, target)
-                    with target.open("rb") as stream:
+                    with target.open("r+b") as stream:
                         os.fsync(stream.fileno())
                     runtime_hashes[relative] = _sha(target)
                 # Include original/public schemas with interpretation code.
@@ -247,7 +249,7 @@ class BackupService:
                         target = dest / "schemas" / source.name
                         target.parent.mkdir(exist_ok=True)
                         shutil.copyfile(source, target)
-                        with target.open("rb") as stream:
+                        with target.open("r+b") as stream:
                             os.fsync(stream.fileno())
                         schema_hashes[source.name] = _sha(target)
                 asset_hashes = {}
@@ -255,7 +257,7 @@ class BackupService:
                     target = dest / "runtime_assets" / relative
                     target.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copyfile(source, target)
-                    with target.open("rb") as stream:
+                    with target.open("r+b") as stream:
                         os.fsync(stream.fileno())
                     asset_hashes[relative] = _sha(target)
                 manifest.update({"status": "COMPLETE", "dump_sha256": _sha(dest / "database.dump"),

@@ -24,6 +24,7 @@ from novel_factory.application.production_pipeline import (
 from novel_factory.application.supervisor import RuntimeSupervisor
 from novel_factory.domain.errors import DomainError
 from novel_factory.fixtures import entity_value, point, run_command
+from novel_factory.infrastructure.private_files import read_private_bytes
 
 pytestmark = [pytest.mark.integration, pytest.mark.postgres]
 
@@ -202,8 +203,9 @@ def test_book_bootstrap_cli_creates_two_isolated_unenrolled_books(kernel_env, tm
     for name, receipt in (("a", a), ("b", b)):
         request_json = json.loads((tmp_path / name / "pipeline.json").read_text())
         access = json.loads((tmp_path / name / "supervisor.json").read_text())
-        assert (tmp_path / name / "supervisor.json").stat().st_mode & 0o077 == 0
-        assert (tmp_path / name / "control.json").stat().st_mode & 0o077 == 0
+        # This validates owner-only ACLs on Windows and mode bits on POSIX.
+        assert json.loads(read_private_bytes(tmp_path / name / "supervisor.json", 100_000)) == access
+        assert read_private_bytes(tmp_path / name / "control.json", 100_000)
         budget = json.loads(subprocess.check_output([sys.executable, str(root / "scripts/p6_budget.py"),
                        "--binding", str(tmp_path / name / "control.json"), "show",
                        "--budget-id", receipt["budget_id"]], env=env))

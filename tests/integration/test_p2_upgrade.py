@@ -1,16 +1,17 @@
 """An accepted P1 world survives the additive P2 migration byte-for-byte."""
-from pathlib import Path
 import subprocess
 import sys
+from pathlib import Path
 
 import pytest
-from tests.fixtures.historical_release import release_database, run_release
 
-from novel_factory.application.kernel import Kernel
 from novel_factory.application.authorization import Principal
+from novel_factory.application.kernel import Kernel
 from novel_factory.infrastructure.objects import ObjectStore
 from novel_factory.infrastructure.recovery import database_snapshot
+from tests.fixtures import historical_release
 
+release_database = historical_release.release_database
 
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 
@@ -38,7 +39,7 @@ try:
 finally:
     db.close()
 """
-    return run_release(repo, directory, p1, seed, env)
+    return historical_release.run_release(repo, directory, p1, seed, env)
 
 
 def test_p1_accepted_world_is_preserved_by_p2_additive_migration(release_database, tmp_path):

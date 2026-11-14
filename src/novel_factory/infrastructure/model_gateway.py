@@ -6,15 +6,18 @@ the model. Credentials are kept only in this adapter and never in provenance.
 """
 from __future__ import annotations
 
-from agent_runtime.protocol import ModelCallFailure, ModelRequest, ModelResponse
-from decimal import Decimal
 import json
 import os
-from typing import Callable, Protocol
+import ssl
+from collections.abc import Callable
+from decimal import Decimal
+from pathlib import Path
+from typing import Protocol
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
-from urllib.request import HTTPRedirectHandler, Request, build_opener
+from urllib.request import HTTPRedirectHandler, HTTPSHandler, Request, build_opener
 
+from agent_runtime.protocol import ModelCallFailure, ModelRequest, ModelResponse
 from novel_factory.domain.canonical import canonical_bytes
 from novel_factory.domain.errors import DomainError
 
@@ -47,6 +50,16 @@ class _NoRedirect(HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         # Never forward credentials or task content to a redirected origin.
         return None
+
+
+def _tls_context():
+    try:
+        capath = os.environ.get("SSL_CERT_DIR")
+        if capath and not Path(capath).is_dir():
+            raise ValueError("Invalid TLS trust directory")
+        return ssl.create_default_context(cafile=os.environ.get("SSL_CERT_FILE"), capath=capath)
+    except (OSError, ValueError):
+        raise ModelCallFailure("MODEL_TLS_CONFIGURATION_INVALID", sent=False) from None
 
 
 class OpenAICompatibleAdapter:
@@ -92,11 +105,20 @@ class OpenAICompatibleAdapter:
     def check_available(self):
         if not self._api_key:
             raise DomainError("MODEL_UNAVAILABLE", "No authorized model credential is configured")
+        if urlsplit(self.endpoint).scheme == "https":
+            try:
+                _tls_context()
+            except ModelCallFailure as error:
+                raise DomainError(error.code, "The configured TLS trust roots cannot be loaded") from None
 
     def generate(self, request: ModelRequest) -> ModelResponse:
         if request.dry_run:
             raise ModelCallFailure("DRY_RUN_UNSUPPORTED_ADAPTER", sent=False)
-        self.check_available()
+        # Preserve a definite pre-send failure even if the CA file changed
+        # between availability checking and this invocation.
+        context = _tls_context() if urlsplit(self.endpoint).scheme == "https" else None
+        if not self._api_key:
+            raise DomainError("MODEL_UNAVAILABLE", "No authorized model credential is configured")
         if request.max_output_tokens > self.max_output_tokens:
             raise DomainError("BUDGET_EXCEEDED", "Requested output exceeds the model configuration")
         body = canonical_bytes({"model": self.model, "messages": list(request.messages),
@@ -108,7 +130,7 @@ class OpenAICompatibleAdapter:
         try:
             # No automatic retry: the persistent call ledger decides whether
             # dispatch is new. A timeout cannot prove that billing did not occur.
-            with build_opener(_NoRedirect).open(req, timeout=self.timeout_seconds) as response:
+            with build_opener(_NoRedirect, HTTPSHandler(context=context)).open(req, timeout=self.timeout_seconds) as response:
                 content = response.read(self.max_response_bytes + 1)
                 if len(content) > self.max_response_bytes:
                     raise ModelCallFailure("MODEL_RESPONSE_TOO_LARGE")
@@ -125,7 +147,7 @@ class OpenAICompatibleAdapter:
                 raise ValueError("Incomplete or tool response")
             text = choice["message"]["content"]
             if not isinstance(text, str):
-                raise ValueError("No text")
+                raise TypeError("No text")
             usage = raw.get("usage") or {}
             def usage_value(value):
                 if value is not None and (type(value) is not int or value < 0):

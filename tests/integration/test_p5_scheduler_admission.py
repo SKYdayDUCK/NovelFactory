@@ -5,12 +5,13 @@ from uuid import uuid4
 
 import pytest
 from sqlalchemy import text
+from test_p5_supervisor import _child, _job, backend
 
 from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.supervisor import RuntimeSupervisor
 from novel_factory.fixtures import load_fixture
-from novel_factory.infrastructure.supervisor_wake import wake_listener, wait_for_change
-from test_p5_supervisor import _child, _job, backend
+from novel_factory.infrastructure.private_files import create_private_file
+from novel_factory.infrastructure.supervisor_wake import wait_for_change, wake_listener
 
 pytestmark = [pytest.mark.postgres, pytest.mark.integration, pytest.mark.concurrency]
 
@@ -24,11 +25,10 @@ def test_committed_hint_only_and_duplicate_reconciliation(kernel_env):
         sup = RuntimeSupervisor(kernel, gateway)
         args = (work["principal"], wr["work_id"], wr["branch_id"])
         assert sup.run_once(*args)["status"] == "IDLE"
-        with pytest.raises(RuntimeError, match="abort"):
-            with kernel.db.uow() as repo:
-                repo.outbox("task.changed", "task", str(uuid4()), {}, "aborted-notification")
-                assert not wait_for_change(listener, .05)
-                raise RuntimeError("abort")
+        with pytest.raises(RuntimeError, match="abort"), kernel.db.uow() as repo:
+            repo.outbox("task.changed", "task", str(uuid4()), {}, "aborted-notification")
+            assert not wait_for_change(listener, .05)
+            raise RuntimeError("abort")
         assert not wait_for_change(listener, .05)
         with kernel.db.uow(write=False) as repo:
             assert repo.one("outbox", {"dedupe_key": "aborted-notification"}) is None
@@ -175,12 +175,13 @@ def test_oldest_eligible_project_first_with_work_and_role_overrides(kernel_env):
 def test_idle_service_wakes_before_periodic_reconciliation(kernel_env, tmp_path):
     import json
     import os
-    from pathlib import Path
     import subprocess
     import sys
     import time
+    from pathlib import Path
 
     from test_p5_process_resume import ROOT, _https
+
     from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
 
     kernel = kernel_env["kernel"]
@@ -188,8 +189,8 @@ def test_idle_service_wakes_before_periodic_reconciliation(kernel_env, tmp_path)
     wr = world["world_ref"]
     budget = kernel.tasks.create_budget(wr["work_id"], "2")
     access = tmp_path / "supervisor.json"
-    access.write_text(json.dumps({"token": world["token"], "work_id": wr["work_id"], "branch_id": wr["branch_id"]}))
-    access.chmod(0o600)
+    with os.fdopen(create_private_file(access), "w", encoding="utf-8") as target:
+        json.dump({"token": world["token"], "work_id": wr["work_id"], "branch_id": wr["branch_id"]}, target)
     label = "nf-idle-" + str(uuid4())
 
     def activity():
@@ -284,8 +285,8 @@ def test_unavailable_first_task_does_not_hide_ready_sibling(kernel_env):
         assert len(requests) == 1
 
 def test_overdue_ready_job_closes_its_dependent_without_an_external_call(kernel_env):
-    from novel_factory.infrastructure.repository import KernelRepository
     from novel_factory.infrastructure.database import tables
+    from novel_factory.infrastructure.repository import KernelRepository
 
     kernel = kernel_env["kernel"]
     world = load_fixture(kernel)
@@ -422,7 +423,8 @@ def test_idle_pool_retires_and_listener_recovers_sql_outage(kernel_env, monkeypa
         monkeypatch.setattr(supervisor, "run_once", interrupt_first_scan)
         controller = AdaptiveController(kernel.db, "model", 2, "model", work=work, branch=branch, interval=.1)
         future = driver.submit(run_supervisor.serve, supervisor, book["principal"], work, branch,
-                               workers=2, interval=.2, stop_event=stop, controller=controller, observation_seconds=.5)
+                               workers=2, interval=.2, stop_event=stop, controller=controller, observation_seconds=.5,
+                               idle_seconds=.2)
         try:
             assert reconnected.wait(4)
             assert retired.wait(12)

@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import re
+import ssl
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -18,6 +19,16 @@ from .protocol import ModelCallFailure, ModelResponse
 
 class ProfileError(ValueError):
     """Stable error codes only. File contents, endpoints and secrets are not diagnostics."""
+
+
+def _check_http_tls():
+    try:
+        capath = os.environ.get("SSL_CERT_DIR")
+        if capath and not Path(capath).is_dir():
+            raise ValueError("Invalid TLS trust directory")
+        ssl.create_default_context(cafile=os.environ.get("SSL_CERT_FILE"), capath=capath)
+    except (OSError, ValueError):
+        raise ModelCallFailure("MODEL_TLS_CONFIGURATION_INVALID", sent=False) from None
 
 
 def _unique(pairs):
@@ -129,6 +140,10 @@ class Profile:
             if not resolve_host_binary():
                 raise ProfileError("MODEL_UNAVAILABLE")
             return None  # The native CLI owns its authenticated account and refresh.
+        try:
+            _check_http_tls()
+        except ModelCallFailure as error:
+            raise ProfileError(error.code) from None
         from .credentials import CredentialError, resolve
         try:
             credential = resolve(self.secret_ref)
@@ -179,6 +194,8 @@ def post(*, url, payload, credential, request_hash, timeout, limit, headers=None
     after its capacity lease expires. Only private stdio carries this request and
     its credential. subprocess.run kills and waits for the helper on timeout.
     """
+    if urlsplit(url).scheme == "https":
+        _check_http_tls()
     packet = json.dumps({"url": url, "payload": payload, "credential": credential,
         "request_hash": request_hash, "timeout": timeout, "limit": limit, "headers": headers,
         "receipt_target": receipt_target},
@@ -194,7 +211,7 @@ def post(*, url, payload, credential, request_hash, timeout, limit, headers=None
             raise ModelCallFailure("MODEL_TRANSPORT_UNKNOWN")
         parsed = json.loads(proc.stdout)
         if "failure" in parsed:
-            raise ModelCallFailure(parsed["failure"], http_status=parsed.get("status"))
+            raise ModelCallFailure(parsed["failure"], sent=parsed.get("sent", True), http_status=parsed.get("status"))
         return base64.b64decode(parsed["content"], validate=True), parsed["receipt"], parsed["transport_window"]
     except (OSError, ValueError, KeyError, subprocess.TimeoutExpired):
         raise ModelCallFailure("MODEL_TRANSPORT_UNKNOWN") from None

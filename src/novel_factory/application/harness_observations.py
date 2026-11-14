@@ -10,6 +10,7 @@ from sqlalchemy import text
 
 from novel_factory.domain.canonical import canonical_bytes
 from novel_factory.domain.creative_review import RUBRICS
+
 from .audit_log import _task_scope, _uuid, record, supports_harness_details
 
 EVENTS = {
@@ -193,7 +194,9 @@ def creative_packet(conn, ref, packet, user, started):
         stage="S1",
         packet_bytes=len(canonical_bytes(user)),
         source_count=len(packet["sources"]),
-        included_count=len(user["creative_materials"]),
+        # Required-MCP reviews retain the frozen packet but initially send
+        # source references only. No creative section is in that wire input.
+        included_count=len(user.get("creative_materials", [])),
         omitted_count=len(packet["omissions"]),
     )
     record(

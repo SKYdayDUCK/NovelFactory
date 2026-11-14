@@ -2,7 +2,6 @@
 
 import json
 import os
-import shutil
 from copy import deepcopy
 from pathlib import Path
 from time import monotonic
@@ -25,6 +24,7 @@ from novel_factory.domain.canonical import fingerprint
 from novel_factory.domain.errors import DomainError
 from novel_factory.fixtures import create_bound_task, load_fixture, point, prepare_command
 from novel_factory.infrastructure.database import tables
+from novel_factory.infrastructure.host_process import resolve_host_binary
 from novel_factory.infrastructure.repository import KernelRepository
 
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
@@ -342,6 +342,7 @@ def test_banquet_absence_pins_reference_and_limits_replanning(
                              "alternative_direction": None, "rationale": "保留角色缺席的已接受后果"}}
     rejoin_request = {**ordinary, "idempotency_key": "change-rejoin", "assessment": rejoin}
     import asyncio
+
     from test_p5_mcp import config, discovered_tools, error, exercise
 
     async def editorial_tools(session, binding, allowed, common):
@@ -357,11 +358,11 @@ def test_banquet_absence_pins_reference_and_limits_replanning(
     director_tools = {"nf_context_get", "nf_query_batch", "nf_artifact_put"}
 
     def host_replay(binding_path, runtime, name, arguments, expected):
-        if shutil.which("codex"):
-            from scripts.probe_codex_mcp import probe_bound_tool
-            result = asyncio.run(probe_bound_tool("codex", binding_path, runtime.available_tools(),
-                                                  name, arguments))
-            assert result["model_turns"] == 0 and result["result"] == expected
+        from scripts.probe_codex_mcp import probe_bound_tool
+        binary = resolve_host_binary()
+        assert binary, "A native Codex executable is required for the zero-model-turn MCP Host probe"
+        result = asyncio.run(probe_bound_tool(binary, binding_path, runtime.available_tools(), name, arguments))
+        assert result["model_turns"] == 0 and result["result"] == expected
 
     async def check_transport(session):
         tools = await editorial_tools(session, "volume_review", "nf_change_point_request", director_tools)
@@ -473,7 +474,7 @@ def test_banquet_absence_pins_reference_and_limits_replanning(
         "decision": "APPROVED", "reason": "符合角色动机，信使可以恢复联络。", "idempotency_key": "review",
     }
     async def check_review(session):
-        await editorial_tools(session, "editorial_decision", "nf_change_point_review", director_tools | {"nf_task_get"})
+        await editorial_tools(session, "editorial_decision", "nf_change_point_review", director_tools | {"nf_task_get", "nf_review_material"})
         response = await session.call_tool("nf_change_point_review", review_arguments)
         assert not response.isError
         return response.structuredContent
